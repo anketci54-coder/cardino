@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AracController;
 use App\Http\Controllers\Auth\GirisController;
 use Illuminate\Support\Facades\Route;
 
@@ -11,4 +12,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', fn () => view('panel'))->name('panel');
     Route::post('/cikis', [GirisController::class, 'destroy'])->name('logout');
+
+    Route::resource('araclar', AracController::class)
+        ->parameters(['araclar' => 'arac'])
+        ->names('araclar');
 });
