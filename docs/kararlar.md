@@ -16,3 +16,4 @@
 | 2026-11-24 | Güvenlik: fail2ban (SSH) + otomatik güvenlik güncellemeleri. Docker ile çakışmasın diye ufw kurulmadı; dışarı yalnızca 22/80/443 açık. |
 | 2026-11-24 | Giriş: e-posta yerine kullanıcı adı + şifre. Roller: admin (Cardino yöneticisi), sahip, personel. Şifreler koda/depoya yazılmaz; kullanıcılar `cardino:kullanici` komutuyla oluşturulur. |
 | 2026-11-24 | Araç kartı: şasi no galeri içinde benzersiz; menşe boş bırakılırsa şasi numarasından tahmin edilir; silme geri alınabilir (soft delete). |
+| 2026-11-24 | Maliyet motoru: her masraf kendi para biriminde (JPY/USD/EUR/TRY/GBP) + işlem günündeki kur + GBP karşılığı (`base_amount`) olarak saklanır. Taban para birimi **GBP**. Kur, masraf günü için `exchange_rates` tablosundan okunur (o güne yoksa en yakın önceki). Araçta `shipping_route` alanı: doğrudan (Gazimağusa/Girne) ya da Mersin aktarmalı. Kâr-zarar = satış GBP − toplam maliyet GBP. Kurlar `cardino:kur <para> <kur> [--tarih=]` ile girilir. |
