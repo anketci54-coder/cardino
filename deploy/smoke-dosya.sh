@@ -52,9 +52,10 @@ echo "Sunum (ilk dosya):"
 FID="$(curl -s -c "$J" -b "$J" "$LOC" | grep -oE 'dosya/[0-9]+' | head -1 | grep -o '[0-9]*')"
 curl -s -c "$J" -b "$J" -D - -o /dev/null "$LOC/dosya/$FID" | grep -iE '^(HTTP|content-type)' | tr -d '\r'
 
-# Temizlik: araç + dosyalar + disk
+# Temizlik: araç + dosyalar + disk (hata olsa da devam et)
+set +e
 T="$(tok "$LOC/edit")"
 curl -s -c "$J" -b "$J" -o /dev/null --data-urlencode "_token=$T" -d "_method=DELETE" "$LOC"
 rm -rf "$APP/storage/app/private/araclar/$VID"
-( cd "$APP" && sudo -u www-data php artisan tinker --execute="\$v=App\\Models\\Vehicle::withTrashed()->find($VID); if(\$v){ \$v->files()->delete(); \$v->forceDelete(); }" >/dev/null 2>&1 )
+( cd "$APP" && sudo -u www-data HOME=/tmp php artisan tinker --execute="\$v=App\\Models\\Vehicle::withTrashed()->where('chassis_no','$SASI')->first(); if(\$v){ \$v->files()->delete(); \$v->costs()->delete(); \$v->forceDelete(); }" >/dev/null 2>&1 )
 echo "Temizlendi. ✓"
