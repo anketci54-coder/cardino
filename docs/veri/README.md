@@ -2,7 +2,7 @@
 
 `ihracat-kibris-turkiye.csv`: Japonya ve İngiltere'den Kıbrıs ve Türkiye'ye ikinci el binek araç ihracatı.
 
-- Japonya → Kıbrıs: Japonya Maliye Bakanlığı ticaret istatistikleri (e-Stat), JUMV derlemesi: https://jumv.net/basic_knowledge_usedcar_export/export_statistics/statistics?country=cyp (çekildi 2026-11-24). Japonya → Türkiye rakamı kaynakta tutarsız; e-Stat'tan teyit edilecek.
+- Japonya → Kıbrıs: Japonya Maliye Bakanlığı ticaret istatistikleri (e-Stat), JUMV derlemesi: https://jumv.net/basic_knowledge_usedcar_export/export_statistics/statistics?country=cyp (çekildi 2026-11-24). Japonya → Türkiye: aynı kaynağın Türkiye sayfası (2021 değeri 2022'nin yıllık değişim oranından hesaplandı; 2016–2020 alınmadı). Ortalama FOB fiyat birimi 10.000 yen (万円).
 - İngiltere: HMRC Overseas Trade Statistics API (https://api.uktradeinfo.com), HS 8703, son iki hanesi 90 olan kodlar = kullanılmış araç. Adet = ek ölçü birimi (SuppUnit). 2026 yalnızca yılın verilen ayları. Çekildi 2026-11-24.
 - Uyarı: İngiltere → Türkiye 2019 (33.608 adet, ortalama ~850 £) ve 2020 değerleri tutarsız görünüyor; muhtemel kayıt/sınıflandırma hatası.
 
@@ -30,7 +30,7 @@ Notlar:
 | Japonya → KKTC limanları (Gazimağusa, Girne) = JP→Kıbrıs − Güney'in JP ithalatı | ~3.700 |
 | İngiltere → KKTC limanları = UK→Kıbrıs − Güney'in UK ithalatı | ~2.200 |
 | İngiltere → Mersin → KKTC | ~4.900 |
-| Japonya → Mersin → KKTC | teyit edilecek (2025 için ~2.000 görünüyor) |
-| **Toplam (Japonya–Mersin hariç)** | **~10.900** |
+| Japonya → Mersin → KKTC | ~3.100 |
+| **Toplam** | **~14.000** |
 
-KKTC Trafik Dairesi'nin galeri ikinci el satışlarıyla (2023 ilk 8 ay 7.654 → yılda ~11.500) uyumlu.
+Karşılaştırma: KKTC Trafik Dairesi'nin galeri ikinci el satışları 2023 ilk 8 ay 7.654 (yılda ~11.500); bu sayım yalnızca 80+ satışı olan markaları içerdiği için gerçek toplam daha yüksek. Aynı büyüklük düzeyinde.
