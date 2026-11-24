@@ -8,7 +8,7 @@
 
 ## Çalışma varsayımı (Kürşat)
 
-Türkiye ikinci el ve sağdan direksiyonlu araç almadığı için Japonya/İngiltere'den Türkiye'ye (Mersin) giden ikinci el araçların ~%90'ı KKTC'ye aktarılır. Japonya, Gazimağusa'ya doğrudan gidenleri "Kıbrıs" olarak yazıyor.
+Türkiye ikinci el ve sağdan direksiyonlu araç almadığı için Japonya/İngiltere'den Türkiye'ye (Mersin) giden ikinci el araçların ~%90'ı KKTC'ye aktarılır. Japonya, KKTC limanlarına (Gazimağusa ve Girne) doğrudan gidenleri "Kıbrıs" olarak yazıyor; ihracat istatistiği limanı değil ülkeyi gösterir, iki liman da aynı rakamın içinde.
 
 KKTC ≈ (JP + UK → Türkiye) × 0,9 + (JP + UK → Kıbrıs) − Güney Kıbrıs ikinci el tescili
 
