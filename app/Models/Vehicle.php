@@ -3,21 +3,26 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToGallery;
+use App\Support\Para;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 #[Fillable([
-    'gallery_id', 'chassis_no', 'engine_no', 'origin', 'make', 'model', 'grade', 'model_year',
+    'gallery_id', 'chassis_no', 'engine_no', 'origin', 'shipping_route', 'make', 'model', 'grade', 'model_year',
     'first_registration', 'color', 'mileage_km', 'engine_cc', 'fuel', 'transmission', 'status',
-    'purchase_date', 'notes', 'created_by',
+    'purchase_date', 'sold_on', 'buyer_name', 'sale_amount', 'sale_currency', 'sale_rate', 'sale_base', 'is_trade_in',
+    'notes', 'created_by',
 ])]
 class Vehicle extends Model
 {
     use BelongsToGallery, SoftDeletes;
 
     public const ORIGINS = ['japonya' => 'Japonya', 'ingiltere' => 'İngiltere', 'diger' => 'Diğer'];
+
+    public const ROUTES = ['direkt' => 'Doğrudan (Gazimağusa / Girne)', 'mersin' => 'Mersin aktarmalı'];
 
     public const STATUSES = ['yolda' => 'Yolda', 'gumrukte' => 'Gümrükte', 'stokta' => 'Stokta', 'satildi' => 'Satıldı'];
 
@@ -33,10 +38,20 @@ class Vehicle extends Model
         return [
             'first_registration' => 'date',
             'purchase_date' => 'date',
+            'sold_on' => 'date',
             'mileage_km' => 'integer',
             'engine_cc' => 'integer',
             'model_year' => 'integer',
+            'sale_amount' => 'decimal:2',
+            'sale_rate' => 'decimal:8',
+            'sale_base' => 'decimal:2',
+            'is_trade_in' => 'boolean',
         ];
+    }
+
+    public function costs(): HasMany
+    {
+        return $this->hasMany(VehicleCost::class);
     }
 
     public function title(): string
@@ -46,7 +61,13 @@ class Vehicle extends Model
 
     public function label(string $field): string
     {
-        $map = ['origin' => self::ORIGINS, 'status' => self::STATUSES, 'fuel' => self::FUELS, 'transmission' => self::TRANSMISSIONS][$field];
+        $map = [
+            'origin' => self::ORIGINS,
+            'shipping_route' => self::ROUTES,
+            'status' => self::STATUSES,
+            'fuel' => self::FUELS,
+            'transmission' => self::TRANSMISSIONS,
+        ][$field];
 
         return $map[$this->{$field}] ?? '—';
     }
@@ -65,6 +86,36 @@ class Vehicle extends Model
 
     public function daysInStock(): ?int
     {
-        return $this->purchase_date ? (int) $this->purchase_date->diffInDays(Carbon::today()) : null;
+        $end = $this->sold_on ?? Carbon::today();
+
+        return $this->purchase_date ? (int) $this->purchase_date->diffInDays($end) : null;
+    }
+
+    /** Toplam maliyet (GBP). İlişki yüklüyse onu kullanır, değilse sorgular. */
+    public function totalCostBase(): float
+    {
+        return (float) ($this->relationLoaded('costs')
+            ? $this->costs->sum('base_amount')
+            : $this->costs()->sum('base_amount'));
+    }
+
+    /** Satış kârı (GBP): satış − toplam maliyet. Satış yoksa null. */
+    public function profitBase(): ?float
+    {
+        if ($this->sale_base === null) {
+            return null;
+        }
+
+        return (float) $this->sale_base - $this->totalCostBase();
+    }
+
+    public function isSold(): bool
+    {
+        return $this->sale_base !== null;
+    }
+
+    public function baseSymbol(): string
+    {
+        return Para::symbol(Para::BASE);
     }
 }

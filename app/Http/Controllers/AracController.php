@@ -52,7 +52,10 @@ class AracController extends Controller
 
     public function show(Vehicle $arac): View
     {
-        return view('araclar.show', ['vehicle' => $arac->load('gallery')]);
+        return view('araclar.show', [
+            'vehicle' => $arac->load(['gallery', 'costs' => fn ($q) => $q->orderBy('spent_on')->orderBy('id')]),
+            'rates' => \App\Models\ExchangeRate::latest(),
+        ]);
     }
 
     public function edit(Request $request, Vehicle $arac): View
@@ -99,6 +102,7 @@ class AracController extends Controller
                 Rule::unique('vehicles', 'chassis_no')->where('gallery_id', $galleryId)->whereNull('deleted_at')->ignore($vehicle?->id)],
             'engine_no' => ['nullable', 'string', 'max:40'],
             'origin' => ['required', Rule::in(array_keys(Vehicle::ORIGINS))],
+            'shipping_route' => ['nullable', Rule::in(array_keys(Vehicle::ROUTES))],
             'make' => ['required', 'string', 'max:50'],
             'model' => ['required', 'string', 'max:80'],
             'grade' => ['nullable', 'string', 'max:80'],

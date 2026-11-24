@@ -68,6 +68,15 @@
             </select>
         </div>
         <div>
+            <label for="shipping_route">Geliş yolu</label>
+            <select id="shipping_route" name="shipping_route">
+                <option value="">—</option>
+                @foreach (\App\Models\Vehicle::ROUTES as $key => $label)
+                    <option value="{{ $key }}" @selected(old('shipping_route', $v->shipping_route) === $key)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
             <label for="status">Durum</label>
             <select id="status" name="status">
                 @foreach (\App\Models\Vehicle::STATUSES as $key => $label)
