@@ -13,3 +13,24 @@ Türkiye ikinci el ve sağdan direksiyonlu araç almadığı için Japonya/İngi
 KKTC ≈ (JP + UK → Türkiye) × 0,9 + (JP + UK → Kıbrıs) − Güney Kıbrıs ikinci el tescili
 
 Güney Kıbrıs ikinci el binek tescili: 2023 ≈ 21.965, 2024 ≈ 23.353 (Cyprus Mail, toplam × kullanılmış oranı).
+
+## Güney Kıbrıs ithalatı (eklendi 2026-11-24)
+
+`guney-kibris-ithalat.csv`: Güney Kıbrıs'ın Japonya ve İngiltere'den ikinci el binek araç ithalatı (adet). Kaynak: Eurostat Comext DS-045409, reporter=CY, flow=ithalat, ek ölçü birimi, CN kodları 870321–870380 son iki hanesi 90. Güney'in bildirimi yalnızca kendi kontrolündeki limanları (Limasol, Larnaka, Baf) kapsar; KKTC limanları dahil değildir. Güney ile Türkiye arasında doğrudan ticaret yok.
+
+Notlar:
+- Brexit öncesi (2016–2020) İngiltere'nin AB içi ihracat kaydı eksik; Güney'in İngiltere'den ithalatı İngiltere'nin "Kıbrıs'a ihracat"ından çok yüksek. Bu yıllar İngiltere kanalı için kullanılmaz.
+- AB dışı ithalatta ortak ülke menşe ülkesidir; Japon menşeli olup başka ülkeden (ör. BAE) gelen araçlar da "Japonya" sayılabilir.
+- Gemi süresi yüzünden yıl sonu sevkiyatlar ertesi yıla kayar; tek yıla değil çok yıllık ortalamaya bakılmalı.
+
+## KKTC tahmini (2022–2025 ortalaması)
+
+| Kanal | Yıllık ortalama (adet) |
+| --- | --- |
+| Japonya → KKTC limanları (Gazimağusa, Girne) = JP→Kıbrıs − Güney'in JP ithalatı | ~3.700 |
+| İngiltere → KKTC limanları = UK→Kıbrıs − Güney'in UK ithalatı | ~2.200 |
+| İngiltere → Mersin → KKTC | ~4.900 |
+| Japonya → Mersin → KKTC | teyit edilecek (2025 için ~2.000 görünüyor) |
+| **Toplam (Japonya–Mersin hariç)** | **~10.900** |
+
+KKTC Trafik Dairesi'nin galeri ikinci el satışlarıyla (2023 ilk 8 ay 7.654 → yılda ~11.500) uyumlu.
