@@ -4,7 +4,7 @@
 set -euo pipefail
 
 DOMAIN="cardino.space"
-WWW="www.cardino.space"
+PANEL="panel.cardino.space"
 EMAIL="kursat_akyol@hotmail.com"
 ROOT="/var/www/cardino/public"
 
@@ -31,7 +31,7 @@ cat > /etc/nginx/sites-available/cardino.space <<NGINX
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAIN $WWW;
+    server_name $DOMAIN $PANEL;
     root $ROOT;
     index index.php index.html;
 
@@ -57,13 +57,13 @@ fi
 echo "== 5/5 DNS kontrolü ve SSL =="
 IP=$(curl -s https://api.ipify.org || true)
 A=$(dig +short "$DOMAIN" A @1.1.1.1 | tail -1)
-W=$(dig +short "$WWW" A @1.1.1.1 | tail -1)
-echo "Sunucu IP: $IP | $DOMAIN -> $A | $WWW -> $W"
+W=$(dig +short "$PANEL" A @1.1.1.1 | tail -1)
+echo "Sunucu IP: $IP | $DOMAIN -> $A | $PANEL -> $W"
 if [ "$A" = "$IP" ] && [ "$W" = "$IP" ]; then
-    certbot --nginx -d "$DOMAIN" -d "$WWW" -m "$EMAIL" --agree-tos --no-eff-email --redirect -n
+    certbot --nginx -d "$DOMAIN" -d "$PANEL" -m "$EMAIL" --agree-tos --no-eff-email --redirect -n
     echo "TAMAM: https://$DOMAIN"
 else
     echo "DNS henüz bu sunucuyu göstermiyor. SSL atlandı."
     echo "DNS yayılınca şu komutla SSL'i kurun:"
-    echo "certbot --nginx -d $DOMAIN -d $WWW -m $EMAIL --agree-tos --no-eff-email --redirect -n"
+    echo "certbot --nginx -d $DOMAIN -d $PANEL -m $EMAIL --agree-tos --no-eff-email --redirect -n"
 fi
