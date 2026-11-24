@@ -15,3 +15,4 @@
 | 2026-11-24 | Günlük yedek: /var/backups/cardino, her gece 03:30, 14 gün. |
 | 2026-11-24 | Güvenlik: fail2ban (SSH) + otomatik güvenlik güncellemeleri. Docker ile çakışmasın diye ufw kurulmadı; dışarı yalnızca 22/80/443 açık. |
 | 2026-11-24 | Giriş: e-posta yerine kullanıcı adı + şifre. Roller: admin (Cardino yöneticisi), sahip, personel. Şifreler koda/depoya yazılmaz; kullanıcılar `cardino:kullanici` komutuyla oluşturulur. |
+| 2026-11-24 | Araç kartı: şasi no galeri içinde benzersiz; menşe boş bırakılırsa şasi numarasından tahmin edilir; silme geri alınabilir (soft delete). |
