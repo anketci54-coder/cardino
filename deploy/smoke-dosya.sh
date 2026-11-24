@@ -8,6 +8,8 @@ URL="${URL:-https://panel.cardino.space}"
 KUL="${KUL:-admin1}"
 SIFRE="${SIFRE:?SIFRE env değişkeni gerekli}"
 APP="${APP:-/var/www/cardino/app}"
+GALERI="${GALERI:-1}"   # yönetici kullanıcı için galeri no
+SASI="SMOKE-$RANDOM"
 
 J="$(mktemp)"
 PNG="$(mktemp --suffix=.png)"
@@ -27,7 +29,7 @@ curl -s -c "$J" -b "$J" -o /dev/null -d "_token=$T&username=$KUL&password=$SIFRE
 # Araç oluştur, ID'yi Location başlığından al
 T="$(tok "$URL/araclar/create")"
 LOC="$(curl -s -c "$J" -b "$J" -D - -o /dev/null --data-urlencode "_token=$T" \
-  -d "make=SmokeTest&model=Dosya&model_year=2022&origin=japonya&status=stokta" \
+  -d "gallery_id=$GALERI&chassis_no=$SASI&make=SmokeTest&model=Dosya&model_year=2022&origin=japonya&status=stokta" \
   "$URL/araclar" | grep -i '^location:' | tr -d '\r' | awk '{print $2}')"
 VID="$(echo "$LOC" | grep -o '[0-9]*$')"
 echo "Araç: $LOC"
