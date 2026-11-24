@@ -14,6 +14,7 @@ KKTC oto galerileri için araç yönetim sistemi: Japonya ve İngiltere'den itha
 
 - Kürşat Akyol (ürün) + Claude (geliştirme)
 - Barındırma: mevcut VPS
+- Alan adı: cardino.space
 - Pilot: 1 galeri
 
 ## Belgeler

@@ -7,3 +7,4 @@
 | 2026-11-24 | Önce araç arşivi/maliyet motoru, sonra takas değerleme. İstihbarat modülü en sona ertelendi. |
 | 2026-11-24 | Başka sitelerden izinsiz veri kazıma yapılmayacak; dış veri yalnızca resmi API veya anlaşmayla alınacak. |
 | 2026-11-24 | Vergi oranları koda gömülmeyecek; yönetici panelinden güncellenebilir tabloda tutulacak. |
+| 2026-11-24 | Alan adı **cardino.space** alındı. |
