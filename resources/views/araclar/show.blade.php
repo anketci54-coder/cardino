@@ -36,6 +36,23 @@
     .salegrid label { font-size: 12px; color: var(--muted); margin-bottom: 3px; display: block; }
     .salegrid input, .salegrid select { width: 100%; padding: .6rem .7rem; border: 1px solid var(--line); border-radius: 8px; font: 15px var(--font); background: #fff; color: var(--ink); }
     .checkrow { display: flex; align-items: center; gap: .5rem; font-size: 14px; }
+    .fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 8px; }
+    .foto { position: relative; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; background: #f4f3f0; }
+    .foto a { display: block; width: 100%; height: 100%; }
+    .foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .foto .del { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); color: #fff; cursor: pointer; font-size: 16px; line-height: 26px; padding: 0; }
+    .docs { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+    .docs li { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px; padding: .55rem .7rem; }
+    .docs .ico { font-size: 18px; }
+    .docs .meta { flex: 1; min-width: 0; }
+    .docs .meta a { font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+    .docs .meta .sub { font-size: 12px; color: var(--muted); }
+    .docs .del { background: none; border: 0; color: var(--danger); cursor: pointer; font-size: 18px; padding: 0 4px; }
+    .uprow { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: end; margin-top: 10px; }
+    @media (max-width: 700px) { .uprow { grid-template-columns: 1fr; } }
+    .uprow label { font-size: 12px; color: var(--muted); margin-bottom: 3px; display: block; }
+    .uprow select, .uprow input[type=file] { width: 100%; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font); background: #fff; color: var(--ink); }
+    .subhead { font-size: 13px; color: var(--muted); font-weight: 600; margin: 4px 0 8px; }
 </style>
 @endpush
 @section('content')
@@ -103,6 +120,79 @@
         </section>
     </div>
 </div>
+
+@php $fotos = $v->photos(); $belgeler = $v->documents(); @endphp
+<section class="panel box" style="margin-top:16px">
+    <h2>Fotoğraflar ve belgeler</h2>
+
+    <div class="subhead">Fotoğraflar</div>
+    @if ($fotos->isNotEmpty())
+        <div class="fotos">
+            @foreach ($fotos as $f)
+                <div class="foto">
+                    <a href="{{ route('dosya.goster', [$v, $f]) }}" target="_blank" rel="noopener">
+                        <img src="{{ route('dosya.goster', [$v, $f]) }}" alt="{{ $f->original_name }}" loading="lazy">
+                    </a>
+                    <form method="POST" action="{{ route('dosya.destroy', [$v, $f]) }}" onsubmit="return confirm('Bu fotoğraf silinsin mi?')">
+                        @csrf @method('DELETE')
+                        <button class="del" type="submit" aria-label="Sil" title="Sil">×</button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    @else
+        <p class="muted" style="margin:0 0 8px">Henüz fotoğraf yok.</p>
+    @endif
+
+    <div class="subhead" style="margin-top:14px">Belgeler</div>
+    @if ($belgeler->isNotEmpty())
+        <ul class="docs">
+            @foreach ($belgeler as $f)
+                <li>
+                    <span class="ico">{{ $f->isImage() ? '🖼️' : '📄' }}</span>
+                    <span class="meta">
+                        <a href="{{ route('dosya.goster', [$v, $f]) }}" target="_blank" rel="noopener">{{ $f->original_name }}</a>
+                        <div class="sub">{{ $f->docTypeLabel() }} · {{ $f->humanSize() }} · {{ $f->created_at->format('d.m.Y') }}</div>
+                    </span>
+                    <form method="POST" action="{{ route('dosya.destroy', [$v, $f]) }}" onsubmit="return confirm('Bu belge silinsin mi?')">
+                        @csrf @method('DELETE')
+                        <button class="del" type="submit" aria-label="Sil" title="Sil">×</button>
+                    </form>
+                </li>
+            @endforeach
+        </ul>
+    @else
+        <p class="muted" style="margin:0 0 8px">Henüz belge yok.</p>
+    @endif
+
+    <form method="POST" action="{{ route('dosya.store', $v) }}" enctype="multipart/form-data" id="dosya-form">
+        @csrf
+        <div class="uprow">
+            <div>
+                <label for="kind">Tür</label>
+                <select id="kind" name="kind">
+                    <option value="foto">Fotoğraf</option>
+                    <option value="belge">Belge</option>
+                </select>
+            </div>
+            <div id="doctype-wrap" style="display:none">
+                <label for="doc_type">Belge türü</label>
+                <select id="doc_type" name="doc_type">
+                    @foreach (\App\Models\VehicleFile::DOC_TYPES as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div id="file-wrap" style="grid-column: span 1;">
+                <label for="files">Dosyalar (JPG, PNG, PDF · en fazla 15 MB)</label>
+                <input id="files" name="files[]" type="file" multiple accept="image/*,application/pdf" required>
+            </div>
+            <div>
+                <button class="btn" type="submit">Yükle</button>
+            </div>
+        </div>
+    </form>
+</section>
 
 <section class="panel box" style="margin-top:16px">
     <h2>Maliyet ve kâr</h2>
@@ -249,6 +339,17 @@
         }
     }
     cur.addEventListener('change', refresh);
+    refresh();
+})();
+(function () {
+    var kind = document.getElementById('kind'), wrap = document.getElementById('doctype-wrap'),
+        accept = document.getElementById('files');
+    function refresh() {
+        var belge = kind.value === 'belge';
+        wrap.style.display = belge ? '' : 'none';
+        accept.setAttribute('accept', belge ? 'image/*,application/pdf' : 'image/*');
+    }
+    kind.addEventListener('change', refresh);
     refresh();
 })();
 </script>

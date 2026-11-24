@@ -54,6 +54,27 @@ class Vehicle extends Model
         return $this->hasMany(VehicleCost::class);
     }
 
+    public function files(): HasMany
+    {
+        return $this->hasMany(VehicleFile::class)->latest();
+    }
+
+    /** Yüklü fotoğraflar (ilişki yüklüyse bellekten filtreler) */
+    public function photos()
+    {
+        return $this->relationLoaded('files')
+            ? $this->files->where('kind', 'foto')->values()
+            : $this->files()->where('kind', 'foto')->get();
+    }
+
+    /** Yüklü belgeler */
+    public function documents()
+    {
+        return $this->relationLoaded('files')
+            ? $this->files->where('kind', 'belge')->values()
+            : $this->files()->where('kind', 'belge')->get();
+    }
+
     public function title(): string
     {
         return trim(collect([$this->model_year, $this->make, $this->model, $this->grade])->filter()->implode(' '));

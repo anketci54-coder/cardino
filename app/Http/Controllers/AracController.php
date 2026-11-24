@@ -53,7 +53,7 @@ class AracController extends Controller
     public function show(Vehicle $arac): View
     {
         return view('araclar.show', [
-            'vehicle' => $arac->load(['gallery', 'costs' => fn ($q) => $q->orderBy('spent_on')->orderBy('id')]),
+            'vehicle' => $arac->load(['gallery', 'costs' => fn ($q) => $q->orderBy('spent_on')->orderBy('id'), 'files']),
             'rates' => \App\Models\ExchangeRate::latest(),
         ]);
     }
