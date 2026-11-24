@@ -66,7 +66,7 @@
                 @if (in_array($v->status, ['yolda', 'gumrukte']))
                     @if ($deadline->isPast())
                         <div class="warn">5 yaş sınırı {{ $deadline->format('d.m.Y') }} tarihinde doldu. Araç gümrükten çekilemeyebilir.</div>
-                    @elseif ($deadline->diffInDays(today()) <= 90)
+                    @elseif (today()->diffInDays($deadline) <= 90)
                         <div class="warn">5 yaş sınırına {{ (int) today()->diffInDays($deadline) }} gün kaldı ({{ $deadline->format('d.m.Y') }}).</div>
                     @else
                         <div class="okbox">5 yaş sınırı: {{ $deadline->format('d.m.Y') }}</div>
