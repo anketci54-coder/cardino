@@ -8,3 +8,4 @@
 | 2026-11-24 | Başka sitelerden izinsiz veri kazıma yapılmayacak; dış veri yalnızca resmi API veya anlaşmayla alınacak. |
 | 2026-11-24 | Vergi oranları koda gömülmeyecek; yönetici panelinden güncellenebilir tabloda tutulacak. |
 | 2026-11-24 | Alan adı **cardino.space** alındı. |
+| 2026-11-24 | nginx + Let's Encrypt SSL kuruldu: https://cardino.space ve https://panel.cardino.space (otomatik yenileme açık, sertifika bitişi 2027-02-22). www Natro yönlendirmesinde kaldı. |
