@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Cardino: günlük yedek (veritabanı + yüklenen dosyalar + .env). Son 14 gün saklanır.
+set -euo pipefail
+APP=/var/www/cardino/app
+DEST=/var/backups/cardino
+KEEP_DAYS=14
+STAMP=$(date +%F_%H%M)
+umask 077
+mkdir -p "$DEST"
+
+mariadb-dump --single-transaction --quick --routines --triggers cardino | gzip -9 > "$DEST/db_$STAMP.sql.gz"
+tar -czf "$DEST/dosyalar_$STAMP.tar.gz" -C "$APP" storage/app .env
+
+find "$DEST" -type f -mtime +$KEEP_DAYS -delete
+echo "$(date '+%F %T') yedek tamam: $(du -sh "$DEST" | cut -f1) toplam" >> "$DEST/yedek.log"

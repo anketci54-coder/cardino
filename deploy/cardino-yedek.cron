@@ -1,0 +1,2 @@
+# Cardino günlük yedek: her gece 03:30
+30 3 * * * root /usr/local/bin/cardino-yedek >/dev/null 2>>/var/backups/cardino/hata.log
