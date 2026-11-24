@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Cardino: GitHub'daki son kodu sunucuya alır.  Kullanım: cardino-guncelle
+set -euo pipefail
+export COMPOSER_ALLOW_SUPERUSER=1
+APP=/var/www/cardino/app
+cd "$APP"
+
+echo "== GitHub'dan çekiliyor =="
+git pull --ff-only origin main
+echo "== Bağımlılıklar =="
+composer install --no-dev --optimize-autoloader --no-interaction --quiet
+if [ -f package.json ] && [ -f vite.config.js ] && command -v npm >/dev/null; then
+    npm ci --silent && npm run build --silent
+fi
+echo "== Veritabanı =="
+php artisan migrate --force
+echo "== Önbellek =="
+php artisan optimize:clear >/dev/null
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+install -m 755 "$APP/deploy/cardino-guncelle" /usr/local/bin/cardino-guncelle
+chown -R www-data:www-data "$APP"
+systemctl reload php8.4-fpm
+
+echo "== Kontrol =="
+git log --oneline -1
+curl -s -o /dev/null -w "panel.cardino.space HTTP %{http_code}\n" https://panel.cardino.space/
