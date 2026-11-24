@@ -13,7 +13,6 @@ biten adımları listede işaretle, GitHub ve sunucuyu eşit tut.
 ## Şu an neredeyiz
 
 - Son güncelleme: 2026-11-24
-- Bitti: Faz 0 altyapının çoğu (alan adı, DNS, SSL, PHP, MariaDB, Laravel 13, GitHub deposu).
-- Devam eden: Laravel kodunu GitHub'a almak ve `cardino-guncelle` güncelleme komutu.
-- Bekleyen (Kürşat): GitHub'a VPS deploy anahtarını eklemek.
+- Bitti: Faz 0 altyapı: alan adı, DNS, SSL, PHP 8.4, MariaDB, Laravel 13, GitHub deposu, sunucu ile GitHub eşit (`cardino-guncelle`).
+- Kalan Faz 0: günlük yedek, sunucu güvenliği, e-posta gönderimi, www yönlendirmesi (Kürşat).
 - Sıradaki: Faz 1, giriş ekranı ve galeri hesabı.

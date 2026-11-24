@@ -11,3 +11,4 @@
 | 2026-11-24 | nginx + Let's Encrypt SSL kuruldu: https://cardino.space ve https://panel.cardino.space (otomatik yenileme açık, sertifika bitişi 2027-02-22). www Natro yönlendirmesinde kaldı. |
 | 2026-11-24 | Teknoloji: PHP 8.4 + Laravel + MariaDB (Debian 13 VPS); arayüz derlemesi için mevcut Node.js 22. |
 | 2026-11-24 | Sunucu kuruldu: PHP 8.4.28, Composer 2.11, MariaDB 11.8, Laravel 13.43 (/var/www/cardino/app), panel.cardino.space Laravel'e bağlandı. Dil tr, production, debug kapalı. |
+| 2026-11-24 | Laravel kodu GitHub'da (depo kökü = Laravel uygulaması). Sunucu GitHub'dan deploy anahtarıyla çeker; güncelleme komutu: `cardino-guncelle`. |
