@@ -36,12 +36,15 @@ class MaliyetHesapController extends Controller
         $yas = max(0, $bugun->year - (int) $data['model_yili']);
 
         // 1) Araç değeri (GBP)
-        $kur = ExchangeRate::rateFor($data['alis_para'], $bugun);
+        $kur = $data['alis_para'] === Para::BASE
+            ? 1.0
+            : (float) ExchangeRate::rateFor($data['alis_para'], $bugun);
         $deger = round((float) $data['alis_fiyat'] * $kur, 2);
 
         // 2) Navlun
-        $navlun = $data['navlun'] !== null && $data['navlun'] !== ''
-            ? (float) $data['navlun']
+        $navlunGirdi = $data['navlun'] ?? null;
+        $navlun = $navlunGirdi !== null && $navlunGirdi !== ''
+            ? (float) $navlunGirdi
             : GumrukAyar::sayi($data['rota'] === 'mersin' ? 'navlun_mersin' : 'navlun_direkt');
 
         // 3) Sigorta
@@ -72,8 +75,9 @@ class MaliyetHesapController extends Controller
         $toplam = round($cif + $gumruk + $kayitHarc + $kdv + $liman + $komisyoncu + $muayene, 2);
 
         // 10) Önerilen satış
-        $marj = $data['kar_marji'] !== null && $data['kar_marji'] !== ''
-            ? (float) $data['kar_marji']
+        $marjGirdi = $data['kar_marji'] ?? null;
+        $marj = $marjGirdi !== null && $marjGirdi !== ''
+            ? (float) $marjGirdi
             : GumrukAyar::sayi('kar_marji', 15);
         $satis = round($toplam * (1 + $marj / 100), 2);
 
