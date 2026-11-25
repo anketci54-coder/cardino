@@ -42,6 +42,7 @@
             </div>
             <button class="btn" type="submit">Giriş yap</button>
         </form>
+        <div style="margin-top:14px;font-size:14px"><a href="{{ route('password.request') }}">Şifremi unuttum</a></div>
         <span class="plate">KKTC</span>
     </div>
 </main>

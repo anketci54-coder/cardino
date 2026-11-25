@@ -42,6 +42,12 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    /** Türkçe şifre sıfırlama e-postası gönder. */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\SifreSifirlamaBildirimi($token));
+    }
+
     public function roleLabel(): string
     {
         return self::ROLES[$this->role] ?? $this->role;

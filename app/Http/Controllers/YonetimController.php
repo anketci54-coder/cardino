@@ -55,6 +55,7 @@ class YonetimController extends Controller
         User::create([
             'username' => $data['username'],
             'name' => $data['name'],
+            'email' => $data['email'] ?? null,
             'password' => $data['password'],
             'role' => $data['role'],
             'gallery_id' => $data['role'] === 'admin' ? null : $data['gallery_id'],
@@ -71,6 +72,7 @@ class YonetimController extends Controller
 
         $yeni = [
             'name' => $data['name'],
+            'email' => $data['email'] ?? null,
             'role' => $data['role'],
             'gallery_id' => $data['role'] === 'admin' ? null : $data['gallery_id'],
             'is_active' => $request->boolean('is_active'),
@@ -101,6 +103,7 @@ class YonetimController extends Controller
                 ? ['required', 'string', 'max:40', 'alpha_dash', Rule::unique('users', 'username')]
                 : ['nullable'],
             'name' => ['required', 'string', 'max:80'],
+            'email' => ['nullable', 'email', 'max:120', Rule::unique('users', 'email')->ignore($user?->id)],
             'role' => ['required', Rule::in(array_keys(User::ROLES))],
             'gallery_id' => [Rule::requiredIf($request->input('role') !== 'admin'), 'nullable', 'exists:galleries,id'],
             'password' => [$isNew ? 'required' : 'nullable', 'string', 'min:8', 'max:100'],

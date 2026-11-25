@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AracController;
 use App\Http\Controllers\Auth\GirisController;
+use App\Http\Controllers\Auth\SifreController;
 use App\Http\Controllers\DosyaController;
 use App\Http\Controllers\MaliyetController;
 use App\Http\Controllers\PanelController;
@@ -12,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/giris', [GirisController::class, 'create'])->name('login');
     Route::post('/giris', [GirisController::class, 'store'])->middleware('throttle:5,1');
+
+    Route::get('/sifremi-unuttum', [SifreController::class, 'istek'])->name('password.request');
+    Route::post('/sifremi-unuttum', [SifreController::class, 'gonder'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/sifre-sifirla/{token}', [SifreController::class, 'goster'])->name('password.reset');
+    Route::post('/sifre-sifirla', [SifreController::class, 'sifirla'])->middleware('throttle:5,1')->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {

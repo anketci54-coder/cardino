@@ -91,6 +91,7 @@
                         <form method="POST" action="{{ route('yonetim.kullanici.update', $k) }}" class="form-izgara">
                             @csrf @method('PUT')
                             <div><label>Görünen ad</label><input name="name" value="{{ $k->name }}" required></div>
+                            <div><label>E-posta</label><input name="email" type="email" value="{{ $k->email }}" placeholder="şifre sıfırlama için"></div>
                             <div>
                                 <label>Rol</label>
                                 <select name="role" @disabled($k->id === auth()->id())>
@@ -135,6 +136,7 @@
             @csrf
             <div><label>Kullanıcı adı</label><input name="username" value="{{ old('username') }}" required></div>
             <div><label>Görünen ad</label><input name="name" value="{{ old('name') }}" required></div>
+            <div><label>E-posta</label><input name="email" type="email" value="{{ old('email') }}" placeholder="şifre sıfırlama için"></div>
             <div>
                 <label>Rol</label>
                 <select name="role" id="yeni-rol">
