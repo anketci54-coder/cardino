@@ -6,6 +6,7 @@ use App\Http\Controllers\DosyaController;
 use App\Http\Controllers\MaliyetController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\SatisController;
+use App\Http\Controllers\YonetimController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -30,4 +31,12 @@ Route::middleware('auth')->group(function () {
     Route::post('araclar/{arac}/dosya', [DosyaController::class, 'store'])->name('dosya.store');
     Route::get('araclar/{arac}/dosya/{dosya}', [DosyaController::class, 'goster'])->name('dosya.goster');
     Route::delete('araclar/{arac}/dosya/{dosya}', [DosyaController::class, 'destroy'])->name('dosya.destroy');
+
+    Route::middleware('admin')->prefix('yonetim')->name('yonetim.')->group(function () {
+        Route::get('/', [YonetimController::class, 'index'])->name('index');
+        Route::post('galeri', [YonetimController::class, 'galeriStore'])->name('galeri.store');
+        Route::put('galeri/{galeri}', [YonetimController::class, 'galeriUpdate'])->name('galeri.update');
+        Route::post('kullanici', [YonetimController::class, 'kullaniciStore'])->name('kullanici.store');
+        Route::put('kullanici/{kullanici}', [YonetimController::class, 'kullaniciUpdate'])->name('kullanici.update');
+    });
 });

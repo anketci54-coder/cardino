@@ -31,6 +31,9 @@
         <nav class="nav">
             <a href="{{ route('panel') }}" @class(['on' => request()->routeIs('panel')])>Panel</a>
             <a href="{{ route('araclar.index') }}" @class(['on' => request()->routeIs('araclar.*')])>Araçlar</a>
+            @if (auth()->user()->isAdmin())
+                <a href="{{ route('yonetim.index') }}" @class(['on' => request()->routeIs('yonetim.*')])>Yönetim</a>
+            @endif
         </nav>
         <div class="who">
             <div>
