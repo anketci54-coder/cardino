@@ -38,6 +38,9 @@
 <div class="cols">
     <section class="panel box">
         <h2>Araç bilgileri</h2>
+        @if ($errors->any())
+            <div class="uyari" style="color:#8a1c12;background:#fdecea;border-color:#f1c4c0;margin-bottom:12px">{{ $errors->first() }}</div>
+        @endif
         <form method="POST" action="{{ route('maliyet.hesapla.sonuc') }}">
             @csrf
             @php $g = $girdi ?? []; @endphp
@@ -46,8 +49,8 @@
                 <div class="ikili">
                     <input type="number" step="0.01" name="alis_fiyat" value="{{ $g['alis_fiyat'] ?? '' }}" required>
                     <select name="alis_para">
-                        @foreach (Para::CURRENCIES as $p)
-                            <option value="{{ $p }}" @selected(($g['alis_para'] ?? 'GBP') === $p)>{{ $p }}</option>
+                        @foreach (Para::CURRENCIES as $kod => $etiket)
+                            <option value="{{ $kod }}" @selected(($g['alis_para'] ?? 'GBP') === $kod)>{{ $etiket }}</option>
                         @endforeach
                     </select>
                 </div>

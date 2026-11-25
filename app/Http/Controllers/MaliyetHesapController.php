@@ -22,7 +22,7 @@ class MaliyetHesapController extends Controller
     {
         $data = $request->validate([
             'alis_fiyat' => ['required', 'numeric', 'min:0'],
-            'alis_para' => ['required', 'in:'.implode(',', Para::CURRENCIES)],
+            'alis_para' => ['required', 'in:'.implode(',', array_keys(Para::CURRENCIES))],
             'yakit' => ['required', 'in:'.implode(',', array_keys(VergiOrani::YAKITLAR))],
             'kullanim' => ['required', 'in:'.implode(',', array_keys(VergiOrani::KULLANIMLAR))],
             'motor_cc' => ['required', 'integer', 'min:0', 'max:20000'],
