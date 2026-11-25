@@ -25,7 +25,10 @@
 </style>
 @endpush
 @section('content')
-<div class="page-head"><h1>Yönetim</h1></div>
+<div class="page-head">
+    <h1>Yönetim</h1>
+    <a class="btn" href="{{ route('yonetim.tarife') }}">Tarife ve vergi oranları →</a>
+</div>
 
 @if ($errors->any())
     <div class="error" role="alert" style="background:#fdecea;color:#8a1c12;border:1px solid #f1c4c0;border-radius:8px;padding:.6rem .9rem;margin-bottom:14px">

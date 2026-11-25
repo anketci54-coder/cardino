@@ -129,11 +129,11 @@
         <p>Araç kartı, masraflar, fotoğraf/belge; satılınca kâr-zarar.</p>
         <span class="tag on">Açık</span>
     </a>
-    <section class="panel mod">
+    <a class="panel mod" href="{{ route('maliyet.hesapla') }}">
         <h3>Maliyet hesaplayıcı</h3>
         <p>Alınacak aracın KKTC'de gümrüklenmiş tahmini maliyeti.</p>
-        <span class="tag">Yakında</span>
-    </section>
+        <span class="tag on">Açık</span>
+    </a>
     <section class="panel mod">
         <h3>Takas değerleme</h3>
         <p>Takasa gelen aracın KKTC piyasa değeri (min–max–ortalama).</p>
