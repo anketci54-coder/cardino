@@ -65,6 +65,7 @@ class TarifeSeeder extends Seeder
             'liman_ardiye' => '150',    // ÖRNEK GBP
             'komisyoncu' => '200',      // ÖRNEK GBP
             'muayene_kayit' => '250',   // ÖRNEK GBP
+            'gecici_kayit' => '15',     // sabit ortalama GBP (getirdelim: benzin ~£22, hibrit ~£10, elektrik ~£8)
             'kar_marji' => '15',        // ÖRNEK %
         ];
         foreach ($ayarlar as $anahtar => $deger) {

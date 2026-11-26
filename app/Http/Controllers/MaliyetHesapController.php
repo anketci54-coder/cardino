@@ -91,9 +91,10 @@ class MaliyetHesapController extends Controller
         $liman = GumrukAyar::sayi('liman_ardiye');
         $komisyoncu = GumrukAyar::sayi('komisyoncu');
         $muayene = GumrukAyar::sayi('muayene_kayit');
+        $geciciKayit = GumrukAyar::sayi('gecici_kayit');
 
         // 12) Toplam (gerçek araç maliyeti üzerinden)
-        $toplam = round($cifGercek + $gumruk + $fif + $rihtim + $gkk + $kdv + $ilkKayit + $liman + $komisyoncu + $muayene, 2);
+        $toplam = round($cifGercek + $gumruk + $fif + $rihtim + $gkk + $kdv + $ilkKayit + $liman + $komisyoncu + $muayene + $geciciKayit, 2);
 
         // 13) Önerilen satış
         $marjGirdi = $data['kar_marji'] ?? null;
@@ -121,6 +122,7 @@ class MaliyetHesapController extends Controller
                 ['Liman / ardiye', $liman, null],
                 ['Komisyoncu', $komisyoncu, null],
                 ['Muayene / evrak', $muayene, null],
+                ['Geçici kayıt harcı', $geciciKayit, 'sabit ortalama'],
             ],
             'cif' => $cifGercek,
             'toplam' => $toplam,

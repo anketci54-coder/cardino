@@ -21,6 +21,7 @@ class GumrukAyar extends Model
         'liman_ardiye' => 'Liman / ardiye / elleçleme (GBP)',
         'komisyoncu' => 'Komisyoncu ücreti (GBP)',
         'muayene_kayit' => 'Muayene / evrak (GBP)',
+        'gecici_kayit' => 'Geçici kayıt harcı (sabit ortalama, GBP)',
         'kar_marji' => 'Hedef kâr marjı (%)',
     ];
 
