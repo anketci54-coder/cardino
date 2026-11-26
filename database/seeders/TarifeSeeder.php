@@ -8,23 +8,25 @@ use App\Models\VergiOrani;
 use Illuminate\Database\Seeder;
 
 /**
- * 2026 KKTC gümrük tarifeleri (Kürşat'ın verdiği resmi çizelge + mevzuat).
- * Hibrit gümrük/FİF değerleri yaklaşıktır; komisyoncuyla teyit edilmeli.
- * İthalat yalnızca UK/Japonya = 3. ülke oranları.
+ * 2026 KKTC gümrük tarifeleri.
+ * Kaynak: getirdelim.com komisyoncu hesaplayıcısı ile çapraz kontrol (2026-11-26);
+ * dayanak FİF Cetvel I (A.E. 221/2026, yürürlük 2026-08-03), Fasıl 87.03/87.80.
+ * İthalat yalnızca UK/Japonya = 3. ülke (özel/binek) oranları.
+ * Ticari (T/eşya) satırları ve sabit geçici kayıt harcı komisyoncuyla teyit bekliyor.
  */
 class TarifeSeeder extends Seeder
 {
     public function run(): void
     {
-        // Yakıt × kullanım: gümrük %, ilk kayıt %, KDV %
+        // Yakıt × kullanım: gümrük %, ilk kayıt (tescil) %, KDV %  (özel/3.ülke, getirdelim teyitli)
         $oranlar = [
             // [yakit, kullanim, gumruk, kayit, kdv]
             ['benzin_dizel', 'ozel', 10, 6, 16],
-            ['benzin_dizel', 'ticari', 10, 5, 16],
-            ['hibrit', 'ozel', 10, 4, 16],      // gümrük bazı aralıklarda indirimli — teyit
-            ['hibrit', 'ticari', 10, 4, 16],
-            ['elektrik', 'ozel', 10, 4, 0],     // 3. ülke gümrük %10; KDV muaf
-            ['elektrik', 'ticari', 10, 4, 0],
+            ['benzin_dizel', 'ticari', 10, 5, 16],   // ticari/T — teyit
+            ['hibrit', 'ozel', 10, 4, 16],
+            ['hibrit', 'ticari', 10, 4, 16],          // ticari — teyit
+            ['elektrik', 'ozel', 10, 4, 16],          // getirdelim KDV %16 uyguluyor (muafiyet YOK) — komisyoncu teyidi
+            ['elektrik', 'ticari', 10, 4, 16],
         ];
         foreach ($oranlar as [$yakit, $kullanim, $g, $k, $kdv]) {
             VergiOrani::query()->updateOrCreate(
@@ -35,25 +37,22 @@ class TarifeSeeder extends Seeder
         // Eski yakıt değerlerini (elektrik_hibrit vb.) temizle
         VergiOrani::query()->whereNotIn('yakit', array_keys(VergiOrani::YAKITLAR))->delete();
 
-        // FİF — yakıt + motor hacmi kademesi
-        if (FifTarifesi::query()->count() === 0) {
-            $fif = [
-                // benzin/dizel: ≤1600 %20, 1601-2000 %35, ≥2001 %50
-                ['benzin_dizel', 0, 1600, 20, 1],
-                ['benzin_dizel', 1601, 2000, 35, 2],
-                ['benzin_dizel', 2001, null, 50, 3],
-                // hibrit: kademeli, indirimli (teyit) — şimdilik benzinle aynı kademeler
-                ['hibrit', 0, 1600, 20, 1],
-                ['hibrit', 1601, 2000, 35, 2],
-                ['hibrit', 2001, null, 50, 3],
-                // elektrik: düz %5
-                ['elektrik', 0, null, 5, 1],
-            ];
-            foreach ($fif as [$yakit, $min, $max, $o, $s]) {
-                FifTarifesi::query()->create([
-                    'yakit' => $yakit, 'min_cc' => $min, 'max_cc' => $max, 'oran' => $o, 'sira' => $s,
-                ]);
-            }
+        // FİF — yakıt + motor hacmi kademesi (getirdelim 2026 teyitli)
+        // benzin/dizel/hibrit aynı eğri: ≤2000 %3, 2001-3000 %8, ≥3001 %12; elektrik düz %5
+        FifTarifesi::query()->delete();
+        $fif = [
+            ['benzin_dizel', 0, 2000, 3, 1],
+            ['benzin_dizel', 2001, 3000, 8, 2],
+            ['benzin_dizel', 3001, null, 12, 3],
+            ['hibrit', 0, 2000, 3, 1],
+            ['hibrit', 2001, 3000, 8, 2],
+            ['hibrit', 3001, null, 12, 3],
+            ['elektrik', 0, null, 5, 1],
+        ];
+        foreach ($fif as [$yakit, $min, $max, $o, $s]) {
+            FifTarifesi::query()->create([
+                'yakit' => $yakit, 'min_cc' => $min, 'max_cc' => $max, 'oran' => $o, 'sira' => $s,
+            ]);
         }
 
         // Genel ayarlar
