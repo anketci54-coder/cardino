@@ -57,13 +57,23 @@ class MaliyetHesapController extends Controller
         $gumrukOran = VergiOrani::oranBul($data['yakit'], $data['kullanim']);
         $gumruk = round($cif * $gumrukOran / 100, 2);
 
-        // 6) Kayıt / ruhsat harcı (cc + yaş tarifesi)
+        // 5b) Fon (CIF üzerinden)
+        $fonOran = GumrukAyar::sayi('fon_orani');
+        $fon = round($cif * $fonOran / 100, 2);
+
+        // 5c) Rıhtım harcı (CIF üzerinden)
+        $rihtimOran = GumrukAyar::sayi('rihtim_orani');
+        $rihtim = round($cif * $rihtimOran / 100, 2);
+
+        // 6) Kayıt / ruhsat harcı — cc + yaş tarifesi (varsa; opsiyonel ek harç)
         $tarife = KayitTarifesi::bul((int) $data['motor_cc'], $yas);
         $kayitHarc = $tarife ? $tarife->harc($deger) : 0.0;
 
-        // 7) KDV
+        // 7) KDV (matrah: CIF + gümrük + fon + rıhtım, ya da yalnız CIF)
         $kdvOran = GumrukAyar::sayi('kdv_orani');
-        $matrah = GumrukAyar::deger('kdv_matrahi', 'cif_gumruk') === 'cif' ? $cif : ($cif + $gumruk);
+        $matrah = GumrukAyar::deger('kdv_matrahi', 'cif_gumruk') === 'cif'
+            ? $cif
+            : ($cif + $gumruk + $fon + $rihtim);
         $kdv = round($matrah * $kdvOran / 100, 2);
 
         // 8) Sabit masraflar
@@ -72,7 +82,7 @@ class MaliyetHesapController extends Controller
         $muayene = GumrukAyar::sayi('muayene_kayit');
 
         // 9) Toplam
-        $toplam = round($cif + $gumruk + $kayitHarc + $kdv + $liman + $komisyoncu + $muayene, 2);
+        $toplam = round($cif + $gumruk + $fon + $rihtim + $kayitHarc + $kdv + $liman + $komisyoncu + $muayene, 2);
 
         // 10) Önerilen satış
         $marjGirdi = $data['kar_marji'] ?? null;
@@ -87,7 +97,9 @@ class MaliyetHesapController extends Controller
                 ['Navlun ('.($data['rota'] === 'mersin' ? 'Mersin aktarmalı' : 'doğrudan').')', $navlun, null],
                 ['Sigorta', $sigorta, GumrukAyar::sayi('sigorta_orani').'%'],
                 ['Gümrük vergisi', $gumruk, $gumrukOran.'% (CIF)'],
-                ['Kayıt / ruhsat harcı', $kayitHarc, $tarife?->araligiMetni() ?? 'tarife yok'],
+                ['Fon', $fon, $fonOran.'% (CIF)'],
+                ['Rıhtım harcı', $rihtim, $rihtimOran.'% (CIF)'],
+                ['Kayıt / ruhsat harcı', $kayitHarc, $tarife?->araligiMetni() ?? '—'],
                 ['KDV', $kdv, $kdvOran.'%'],
                 ['Liman / ardiye', $liman, null],
                 ['Komisyoncu', $komisyoncu, null],

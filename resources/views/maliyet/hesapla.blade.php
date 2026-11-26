@@ -120,10 +120,6 @@
                 </tr>
             </table>
 
-            @unless ($sonuc['tarife_var'])
-                <div class="uyari" style="margin-top:14px">Bu cc/yaş için kayıt tarifesi bulunamadı — kayıt harcı 0 alındı. Tarife tablosuna kademe ekleyin.</div>
-            @endunless
-
             <div class="satis-kutu">
                 <div class="k">Önerilen satış (%{{ rtrim(rtrim(number_format($sonuc['marj'], 1, ',', '.'), '0'), ',') }} kâr)</div>
                 <div class="v">{{ Para::format($sonuc['satis'], 'GBP') }}</div>
