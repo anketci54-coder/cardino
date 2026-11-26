@@ -52,8 +52,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('tarife', [TarifeController::class, 'index'])->name('tarife');
         Route::put('tarife', [TarifeController::class, 'ayarlariGuncelle'])->name('tarife.ayar');
-        Route::post('tarife/kayit', [TarifeController::class, 'kayitStore'])->name('tarife.kayit.store');
-        Route::put('tarife/kayit/{tarife}', [TarifeController::class, 'kayitUpdate'])->name('tarife.kayit.update');
-        Route::delete('tarife/kayit/{tarife}', [TarifeController::class, 'kayitDestroy'])->name('tarife.kayit.destroy');
+        Route::post('tarife/fif', [TarifeController::class, 'fifStore'])->name('tarife.fif.store');
+        Route::put('tarife/fif/{fif}', [TarifeController::class, 'fifUpdate'])->name('tarife.fif.update');
+        Route::delete('tarife/fif/{fif}', [TarifeController::class, 'fifDestroy'])->name('tarife.fif.destroy');
     });
 });

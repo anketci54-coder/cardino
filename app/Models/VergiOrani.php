@@ -5,32 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-/** Gümrük vergisi oranı: yakıt türü × kullanım. */
-#[Fillable(['yakit', 'kullanim', 'oran'])]
+/** Yakıt × kullanım için gümrük vergisi, ilk kayıt harcı ve KDV oranları (%). */
+#[Fillable(['yakit', 'kullanim', 'gumruk_orani', 'kayit_orani', 'kdv_orani'])]
 class VergiOrani extends Model
 {
     protected $table = 'vergi_oranlari';
 
     public const YAKITLAR = [
         'benzin_dizel' => 'Benzin / Dizel',
-        'elektrik_hibrit' => 'Elektrik / Hibrit',
+        'hibrit' => 'Hibrit',
+        'elektrik' => 'Elektrik',
     ];
 
     public const KULLANIMLAR = [
         'ozel' => 'Özel',
-        'ticari' => 'Ticari',
+        'ticari' => 'Ticari (T)',
     ];
 
     protected function casts(): array
     {
-        return ['oran' => 'decimal:3'];
+        return [
+            'gumruk_orani' => 'decimal:3',
+            'kayit_orani' => 'decimal:3',
+            'kdv_orani' => 'decimal:3',
+        ];
     }
 
-    /** Yakıt + kullanım için oran (%) döndürür; yoksa 0. */
-    public static function oranBul(string $yakit, string $kullanim): float
+    /** Yakıt + kullanım satırını döndürür (yoksa null). */
+    public static function bul(string $yakit, string $kullanim): ?self
     {
-        $kayit = static::query()->where('yakit', $yakit)->where('kullanim', $kullanim)->first();
-
-        return (float) ($kayit->oran ?? 0);
+        return static::query()->where('yakit', $yakit)->where('kullanim', $kullanim)->first();
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FifTarifesi;
 use App\Models\GumrukAyar;
-use App\Models\KayitTarifesi;
 use App\Models\VergiOrani;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,25 +15,31 @@ class TarifeController extends Controller
     {
         return view('yonetim.tarife', [
             'oranlar' => VergiOrani::query()->orderBy('yakit')->orderBy('kullanim')->get(),
-            'tarifeler' => KayitTarifesi::query()->orderBy('sira')->orderBy('min_cc')->get(),
+            'fifler' => FifTarifesi::query()->orderBy('yakit')->orderBy('sira')->orderBy('min_cc')->get(),
             'ayarlar' => GumrukAyar::query()->get()->keyBy('anahtar'),
         ]);
     }
 
-    /** Gümrük vergisi oranları + genel ayarları birlikte günceller. */
+    /** Yakıt×kullanım oranları + genel ayarları birlikte günceller. */
     public function ayarlariGuncelle(Request $request): RedirectResponse
     {
         $request->validate([
             'oran' => ['array'],
-            'oran.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'ayar' => ['array'],
             'ayar.*' => ['nullable', 'string', 'max:100'],
         ]);
 
-        foreach (($request->input('oran', [])) as $id => $deger) {
-            if ($deger !== null && $deger !== '') {
-                VergiOrani::query()->whereKey($id)->update(['oran' => (float) str_replace(',', '.', $deger)]);
+        foreach (($request->input('oran', [])) as $id => $alanlar) {
+            $satir = VergiOrani::query()->find($id);
+            if (! $satir) {
+                continue;
             }
+            foreach (['gumruk_orani', 'kayit_orani', 'kdv_orani'] as $alan) {
+                if (isset($alanlar[$alan]) && $alanlar[$alan] !== '') {
+                    $satir->{$alan} = (float) str_replace(',', '.', $alanlar[$alan]);
+                }
+            }
+            $satir->save();
         }
 
         foreach (($request->input('ayar', [])) as $anahtar => $deger) {
@@ -45,39 +51,34 @@ class TarifeController extends Controller
         return back()->with('ok', 'Oranlar ve ayarlar güncellendi.');
     }
 
-    public function kayitStore(Request $request): RedirectResponse
+    public function fifStore(Request $request): RedirectResponse
     {
-        $data = $this->kayitKurallari($request);
-        KayitTarifesi::query()->create($data);
+        FifTarifesi::query()->create($this->fifKurallari($request));
 
-        return back()->with('ok', 'Tarife kademesi eklendi.');
+        return back()->with('ok', 'FİF kademesi eklendi.');
     }
 
-    public function kayitUpdate(Request $request, KayitTarifesi $tarife): RedirectResponse
+    public function fifUpdate(Request $request, FifTarifesi $fif): RedirectResponse
     {
-        $data = $this->kayitKurallari($request);
-        $tarife->update($data);
+        $fif->update($this->fifKurallari($request));
 
-        return back()->with('ok', 'Tarife kademesi güncellendi.');
+        return back()->with('ok', 'FİF kademesi güncellendi.');
     }
 
-    public function kayitDestroy(KayitTarifesi $tarife): RedirectResponse
+    public function fifDestroy(FifTarifesi $fif): RedirectResponse
     {
-        $tarife->delete();
+        $fif->delete();
 
-        return back()->with('ok', 'Tarife kademesi silindi.');
+        return back()->with('ok', 'FİF kademesi silindi.');
     }
 
-    private function kayitKurallari(Request $request): array
+    private function fifKurallari(Request $request): array
     {
         return $request->validate([
+            'yakit' => ['required', 'in:'.implode(',', array_keys(VergiOrani::YAKITLAR))],
             'min_cc' => ['required', 'integer', 'min:0'],
             'max_cc' => ['nullable', 'integer', 'min:0'],
-            'min_yas' => ['required', 'integer', 'min:0'],
-            'max_yas' => ['nullable', 'integer', 'min:0'],
-            'tutar_gbp' => ['nullable', 'numeric', 'min:0'],
-            'oran' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'aciklama' => ['nullable', 'string', 'max:255'],
+            'oran' => ['required', 'numeric', 'min:0', 'max:100'],
             'sira' => ['nullable', 'integer', 'min:0'],
         ]);
     }

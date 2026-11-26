@@ -13,16 +13,14 @@ class GumrukAyar extends Model
 
     /** Tanımlı ayarlar ve açıklamaları (sıra + etiket). */
     public const TANIMLAR = [
-        'fon_orani' => 'Fon oranı (CIF %\'si)',
-        'rihtim_orani' => 'Rıhtım harcı oranı (CIF %\'si)',
-        'kdv_orani' => 'KDV oranı (%)',
-        'kdv_matrahi' => 'KDV matrahı (cif_gumruk = CIF+gümrük+fon+rıhtım; cif = yalnız CIF)',
+        'rihtim_orani' => 'Rıhtım resmi oranı (CIF %\'si)',
+        'gkk_orani' => 'GKK (Güvenlik Kuvvetleri Fonu) oranı (CIF %\'si)',
         'navlun_direkt' => 'Varsayılan navlun — doğrudan (Gazimağusa/Girne) (GBP)',
         'navlun_mersin' => 'Varsayılan navlun — Mersin aktarmalı (GBP)',
         'sigorta_orani' => 'Sigorta oranı (araç değerinin %\'si)',
         'liman_ardiye' => 'Liman / ardiye / elleçleme (GBP)',
         'komisyoncu' => 'Komisyoncu ücreti (GBP)',
-        'muayene_kayit' => 'Muayene / plaka / evrak (GBP)',
+        'muayene_kayit' => 'Muayene / evrak (GBP)',
         'kar_marji' => 'Hedef kâr marjı (%)',
     ];
 

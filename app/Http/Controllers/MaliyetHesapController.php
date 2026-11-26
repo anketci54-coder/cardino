@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ExchangeRate;
+use App\Models\FifTarifesi;
 use App\Models\GumrukAyar;
-use App\Models\KayitTarifesi;
 use App\Models\VergiOrani;
 use App\Support\Para;
 use Illuminate\Http\Request;
@@ -59,38 +59,43 @@ class MaliyetHesapController extends Controller
         $cifVergi = round($degerGumruk + $navlun + $sigorta, 2);
         $cifGercek = round($degerFatura + $navlun + $sigorta, 2);
 
-        // 5) Gümrük vergisi (vergi tabanı CIF üzerinden)
-        $gumrukOran = VergiOrani::oranBul($data['yakit'], $data['kullanim']);
+        // Yakıt + kullanım oranları (gümrük, ilk kayıt, KDV)
+        $oran = VergiOrani::bul($data['yakit'], $data['kullanim']);
+        $gumrukOran = (float) ($oran->gumruk_orani ?? 0);
+        $kayitOran = (float) ($oran->kayit_orani ?? 0);
+        $kdvOran = (float) ($oran->kdv_orani ?? 0);
+
+        // 5) Gümrük vergisi (CIF)
         $gumruk = round($cifVergi * $gumrukOran / 100, 2);
 
-        // 5b) Fon
-        $fonOran = GumrukAyar::sayi('fon_orani');
-        $fon = round($cifVergi * $fonOran / 100, 2);
+        // 6) FİF — motor hacmi + yakıt kademesi (CIF)
+        $fifOran = FifTarifesi::oranBul($data['yakit'], (int) $data['motor_cc']);
+        $fif = round($cifVergi * $fifOran / 100, 2);
 
-        // 5c) Rıhtım harcı
+        // 7) Rıhtım resmi (CIF)
         $rihtimOran = GumrukAyar::sayi('rihtim_orani');
         $rihtim = round($cifVergi * $rihtimOran / 100, 2);
 
-        // 6) Kayıt / ruhsat harcı — cc + yaş tarifesi (varsa; opsiyonel ek harç)
-        $tarife = KayitTarifesi::bul((int) $data['motor_cc'], $yas);
-        $kayitHarc = $tarife ? $tarife->harc($degerGumruk) : 0.0;
+        // 8) GKK — Güvenlik Kuvvetleri Fonu (CIF)
+        $gkkOran = GumrukAyar::sayi('gkk_orani');
+        $gkk = round($cifVergi * $gkkOran / 100, 2);
 
-        // 7) KDV (matrah: vergi CIF + gümrük + fon + rıhtım, ya da yalnız CIF)
-        $kdvOran = GumrukAyar::sayi('kdv_orani');
-        $matrah = GumrukAyar::deger('kdv_matrahi', 'cif_gumruk') === 'cif'
-            ? $cifVergi
-            : ($cifVergi + $gumruk + $fon + $rihtim);
-        $kdv = round($matrah * $kdvOran / 100, 2);
+        // 9) KDV — matrah: CIF + gümrük + FİF + rıhtım + GKK (kümülatif)
+        $kdvMatrah = $cifVergi + $gumruk + $fif + $rihtim + $gkk;
+        $kdv = round($kdvMatrah * $kdvOran / 100, 2);
 
-        // 8) Sabit masraflar
+        // 10) İlk kayıt (plaka) harcı — CIF üzerinden
+        $ilkKayit = round($cifVergi * $kayitOran / 100, 2);
+
+        // 11) Sabit masraflar
         $liman = GumrukAyar::sayi('liman_ardiye');
         $komisyoncu = GumrukAyar::sayi('komisyoncu');
         $muayene = GumrukAyar::sayi('muayene_kayit');
 
-        // 9) Toplam (gerçek araç maliyeti üzerinden)
-        $toplam = round($cifGercek + $gumruk + $fon + $rihtim + $kayitHarc + $kdv + $liman + $komisyoncu + $muayene, 2);
+        // 12) Toplam (gerçek araç maliyeti üzerinden)
+        $toplam = round($cifGercek + $gumruk + $fif + $rihtim + $gkk + $kdv + $ilkKayit + $liman + $komisyoncu + $muayene, 2);
 
-        // 10) Önerilen satış
+        // 13) Önerilen satış
         $marjGirdi = $data['kar_marji'] ?? null;
         $marj = $marjGirdi !== null && $marjGirdi !== ''
             ? (float) $marjGirdi
@@ -107,21 +112,22 @@ class MaliyetHesapController extends Controller
                 ['Araç değeri (fatura)', $degerFatura, $degerNot],
                 ['Navlun ('.($data['rota'] === 'mersin' ? 'Mersin aktarmalı' : 'doğrudan').')', $navlun, null],
                 ['Sigorta', $sigorta, GumrukAyar::sayi('sigorta_orani').'%'],
-                ['Gümrük vergisi', $gumruk, $gumrukOran.'% (CIF)'],
-                ['Fon', $fon, $fonOran.'% (CIF)'],
-                ['Rıhtım harcı', $rihtim, $rihtimOran.'% (CIF)'],
-                ['Kayıt / ruhsat harcı', $kayitHarc, $tarife?->araligiMetni() ?? '—'],
-                ['KDV', $kdv, $kdvOran.'%'],
+                ['Gümrük vergisi', $gumruk, $gumrukOran.'% · CIF'],
+                ['FİF (Fiyat İstikrar Fonu)', $fif, $fifOran.'% · '.((int) $data['motor_cc']).' cc'],
+                ['Rıhtım resmi', $rihtim, $rihtimOran.'% · CIF'],
+                ['GKK fonu', $gkk, $gkkOran.'% · CIF'],
+                ['KDV', $kdv, ($kdvOran > 0 ? $kdvOran.'% (kümülatif matrah)' : 'muaf')],
+                ['İlk kayıt (plaka) harcı', $ilkKayit, $kayitOran.'% · CIF'],
                 ['Liman / ardiye', $liman, null],
                 ['Komisyoncu', $komisyoncu, null],
-                ['Muayene / plaka / evrak', $muayene, null],
+                ['Muayene / evrak', $muayene, null],
             ],
             'cif' => $cifGercek,
             'toplam' => $toplam,
             'satis' => $satis,
             'marj' => $marj,
             'yas' => $yas,
-            'tarife_var' => $tarife !== null,
+            'tarife_var' => true,
         ];
 
         return view('maliyet.hesapla', ['sonuc' => $sonuc, 'girdi' => $data]);
