@@ -55,6 +55,10 @@
                     </select>
                 </div>
             </div>
+            <div class="alan">
+                <label>Gümrük değeri (referans, boş = alış fiyatı)</label>
+                <input type="number" step="0.01" name="gumruk_degeri" value="{{ $g['gumruk_degeri'] ?? '' }}" placeholder="dolu pakette gümrüğün biçtiği değer">
+            </div>
             <div class="alan ikili">
                 <div>
                     <label>Yakıt</label>

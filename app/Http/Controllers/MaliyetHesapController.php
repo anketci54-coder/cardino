@@ -28,6 +28,7 @@ class MaliyetHesapController extends Controller
             'motor_cc' => ['required', 'integer', 'min:0', 'max:20000'],
             'model_yili' => ['required', 'integer', 'min:1950', 'max:'.(now()->year + 1)],
             'rota' => ['required', 'in:direkt,mersin'],
+            'gumruk_degeri' => ['nullable', 'numeric', 'min:0'],
             'navlun' => ['nullable', 'numeric', 'min:0'],
             'kar_marji' => ['nullable', 'numeric', 'min:0', 'max:500'],
         ]);
@@ -35,11 +36,15 @@ class MaliyetHesapController extends Controller
         $bugun = Carbon::today();
         $yas = max(0, $bugun->year - (int) $data['model_yili']);
 
-        // 1) Araç değeri (GBP)
+        // 1) Araç değeri (GBP). Fatura = ödenen; gümrük değeri = vergi tabanı (referans)
         $kur = $data['alis_para'] === Para::BASE
             ? 1.0
             : (float) ExchangeRate::rateFor($data['alis_para'], $bugun);
-        $deger = round((float) $data['alis_fiyat'] * $kur, 2);
+        $degerFatura = round((float) $data['alis_fiyat'] * $kur, 2);
+        $gumrukGirdi = $data['gumruk_degeri'] ?? null;
+        $degerGumruk = $gumrukGirdi !== null && $gumrukGirdi !== ''
+            ? round((float) $gumrukGirdi * $kur, 2)
+            : $degerFatura;
 
         // 2) Navlun
         $navlunGirdi = $data['navlun'] ?? null;
@@ -47,33 +52,34 @@ class MaliyetHesapController extends Controller
             ? (float) $navlunGirdi
             : GumrukAyar::sayi($data['rota'] === 'mersin' ? 'navlun_mersin' : 'navlun_direkt');
 
-        // 3) Sigorta
-        $sigorta = round($deger * GumrukAyar::sayi('sigorta_orani') / 100, 2);
+        // 3) Sigorta (gerçek değer üzerinden)
+        $sigorta = round($degerFatura * GumrukAyar::sayi('sigorta_orani') / 100, 2);
 
-        // 4) CIF
-        $cif = round($deger + $navlun + $sigorta, 2);
+        // 4) CIF: vergi tabanı (gümrük değeriyle) ve gerçek maliyet (faturayla)
+        $cifVergi = round($degerGumruk + $navlun + $sigorta, 2);
+        $cifGercek = round($degerFatura + $navlun + $sigorta, 2);
 
-        // 5) Gümrük vergisi (CIF üzerinden)
+        // 5) Gümrük vergisi (vergi tabanı CIF üzerinden)
         $gumrukOran = VergiOrani::oranBul($data['yakit'], $data['kullanim']);
-        $gumruk = round($cif * $gumrukOran / 100, 2);
+        $gumruk = round($cifVergi * $gumrukOran / 100, 2);
 
-        // 5b) Fon (CIF üzerinden)
+        // 5b) Fon
         $fonOran = GumrukAyar::sayi('fon_orani');
-        $fon = round($cif * $fonOran / 100, 2);
+        $fon = round($cifVergi * $fonOran / 100, 2);
 
-        // 5c) Rıhtım harcı (CIF üzerinden)
+        // 5c) Rıhtım harcı
         $rihtimOran = GumrukAyar::sayi('rihtim_orani');
-        $rihtim = round($cif * $rihtimOran / 100, 2);
+        $rihtim = round($cifVergi * $rihtimOran / 100, 2);
 
         // 6) Kayıt / ruhsat harcı — cc + yaş tarifesi (varsa; opsiyonel ek harç)
         $tarife = KayitTarifesi::bul((int) $data['motor_cc'], $yas);
-        $kayitHarc = $tarife ? $tarife->harc($deger) : 0.0;
+        $kayitHarc = $tarife ? $tarife->harc($degerGumruk) : 0.0;
 
-        // 7) KDV (matrah: CIF + gümrük + fon + rıhtım, ya da yalnız CIF)
+        // 7) KDV (matrah: vergi CIF + gümrük + fon + rıhtım, ya da yalnız CIF)
         $kdvOran = GumrukAyar::sayi('kdv_orani');
         $matrah = GumrukAyar::deger('kdv_matrahi', 'cif_gumruk') === 'cif'
-            ? $cif
-            : ($cif + $gumruk + $fon + $rihtim);
+            ? $cifVergi
+            : ($cifVergi + $gumruk + $fon + $rihtim);
         $kdv = round($matrah * $kdvOran / 100, 2);
 
         // 8) Sabit masraflar
@@ -81,8 +87,8 @@ class MaliyetHesapController extends Controller
         $komisyoncu = GumrukAyar::sayi('komisyoncu');
         $muayene = GumrukAyar::sayi('muayene_kayit');
 
-        // 9) Toplam
-        $toplam = round($cif + $gumruk + $fon + $rihtim + $kayitHarc + $kdv + $liman + $komisyoncu + $muayene, 2);
+        // 9) Toplam (gerçek araç maliyeti üzerinden)
+        $toplam = round($cifGercek + $gumruk + $fon + $rihtim + $kayitHarc + $kdv + $liman + $komisyoncu + $muayene, 2);
 
         // 10) Önerilen satış
         $marjGirdi = $data['kar_marji'] ?? null;
@@ -91,9 +97,14 @@ class MaliyetHesapController extends Controller
             : GumrukAyar::sayi('kar_marji', 15);
         $satis = round($toplam * (1 + $marj / 100), 2);
 
+        $farkli = $degerGumruk !== $degerFatura;
+        $degerNot = number_format((float) $data['alis_fiyat'], 0, ',', '.').' '.$data['alis_para']
+            .' × '.rtrim(rtrim(number_format($kur, 6, ',', '.'), '0'), ',')
+            .($farkli ? ' · vergi tabanı: '.number_format($degerGumruk, 2, ',', '.').' GBP' : '');
+
         $sonuc = [
             'kalemler' => [
-                ['Araç değeri', $deger, number_format((float) $data['alis_fiyat'], 0, ',', '.').' '.$data['alis_para'].' × '.rtrim(rtrim(number_format($kur, 6, ',', '.'), '0'), ',')],
+                ['Araç değeri (fatura)', $degerFatura, $degerNot],
                 ['Navlun ('.($data['rota'] === 'mersin' ? 'Mersin aktarmalı' : 'doğrudan').')', $navlun, null],
                 ['Sigorta', $sigorta, GumrukAyar::sayi('sigorta_orani').'%'],
                 ['Gümrük vergisi', $gumruk, $gumrukOran.'% (CIF)'],
@@ -105,7 +116,7 @@ class MaliyetHesapController extends Controller
                 ['Komisyoncu', $komisyoncu, null],
                 ['Muayene / plaka / evrak', $muayene, null],
             ],
-            'cif' => $cif,
+            'cif' => $cifGercek,
             'toplam' => $toplam,
             'satis' => $satis,
             'marj' => $marj,
