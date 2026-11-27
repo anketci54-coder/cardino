@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('maliyet-hesapla', [MaliyetHesapController::class, 'form'])->name('maliyet.hesapla');
     Route::post('maliyet-hesapla', [MaliyetHesapController::class, 'hesapla'])->name('maliyet.hesapla.sonuc');
+    Route::post('araclar-tahminden', [AracController::class, 'tahminForm'])->name('araclar.tahmin');
 
     Route::middleware('admin')->prefix('yonetim')->name('yonetim.')->group(function () {
         Route::get('/', [YonetimController::class, 'index'])->name('index');

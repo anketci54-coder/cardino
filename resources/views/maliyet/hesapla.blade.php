@@ -129,6 +129,15 @@
                 <div class="v">{{ Para::format($sonuc['satis'], 'GBP') }}</div>
             </div>
             <p class="intro" style="margin-top:10px">Aracın yaşı: {{ $sonuc['yas'] }} · CIF (değer+navlun+sigorta): {{ Para::format($sonuc['cif'], 'GBP') }}</p>
+
+            <form method="POST" action="{{ route('araclar.tahmin') }}" style="margin-top:14px">
+                @csrf
+                @foreach (['alis_fiyat','alis_para','yakit','kullanim','motor_cc','model_yili','rota','gumruk_degeri','navlun','kar_marji'] as $alan)
+                    <input type="hidden" name="{{ $alan }}" value="{{ $girdi[$alan] ?? '' }}">
+                @endforeach
+                <button class="btn" type="submit" style="width:100%">→ Bu tahmini araca dönüştür</button>
+                <p class="intro" style="margin:8px 0 0;font-size:13px">Araç formu bu bilgilerle açılır; marka, model ve şasi numarasını ekleyip kaydedince maliyet kalemleri de otomatik oluşur.</p>
+            </form>
         @else
             <div class="bos">Soldaki bilgileri doldurup “Hesapla”ya basın.</div>
         @endif

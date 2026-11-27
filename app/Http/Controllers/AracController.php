@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Gallery;
 use App\Models\Vehicle;
+use App\Models\VehicleCost;
+use App\Models\VergiOrani;
+use App\Support\MaliyetHesaplayici;
 use App\Support\Mense;
+use App\Support\Para;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -35,10 +40,48 @@ class AracController extends Controller
 
     public function create(Request $request): View
     {
+        $kostTaslak = null;
+        $vehicle = new Vehicle(['status' => 'stokta']);
+
+        // Maliyet tahmininden gelindiyse (oturumdaki taslak) formu önceden doldur
+        if ($request->boolean('tahmin') && $request->session()->has('maliyet_taslak')) {
+            $kostTaslak = $request->session()->get('maliyet_taslak');
+            $onDolu = $request->session()->get('tahmin_arac', []);
+            $vehicle = new Vehicle(['status' => 'stokta'] + array_intersect_key($onDolu, array_flip([
+                'fuel', 'engine_cc', 'model_year', 'shipping_route',
+            ])));
+        }
+
         return view('araclar.form', [
-            'vehicle' => new Vehicle(['status' => 'stokta']),
+            'vehicle' => $vehicle,
             'galleries' => $this->galleriesFor($request),
+            'kostTaslak' => $kostTaslak,
         ]);
+    }
+
+    /** Maliyet tahminini araç kartına dönüştürme: hesaplar, oturuma koyar, create formuna yönlendirir. */
+    public function tahminForm(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'alis_fiyat' => ['required', 'numeric', 'min:0'],
+            'alis_para' => ['required', 'in:'.implode(',', array_keys(Para::CURRENCIES))],
+            'yakit' => ['required', 'in:'.implode(',', array_keys(VergiOrani::YAKITLAR))],
+            'kullanim' => ['required', 'in:'.implode(',', array_keys(VergiOrani::KULLANIMLAR))],
+            'motor_cc' => ['required', 'integer', 'min:0', 'max:20000'],
+            'model_yili' => ['required', 'integer', 'min:1950', 'max:'.(date('Y') + 1)],
+            'rota' => ['required', 'in:direkt,mersin'],
+            'gumruk_degeri' => ['nullable', 'numeric', 'min:0'],
+            'navlun' => ['nullable', 'numeric', 'min:0'],
+            'kar_marji' => ['nullable', 'numeric', 'min:0', 'max:500'],
+        ]);
+
+        $h = MaliyetHesaplayici::hesapla($data);
+
+        // Kalemleri + araç ön dolgusunu oturumda tut (istemciye güvenmeyiz); create ekranına geç
+        $request->session()->put('maliyet_taslak', $h['kostlar']);
+        $request->session()->put('tahmin_arac', $h['arac']);
+
+        return redirect()->route('araclar.create', ['tahmin' => 1]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -47,7 +90,48 @@ class AracController extends Controller
         $data['created_by'] = $request->user()->id;
         $vehicle = Vehicle::create($data);
 
+        // Tahminden gelen maliyet kalemlerini ekle (oturumdaki taslaktan, istemci verisine güvenmeden)
+        if ($request->boolean('tahminden')) {
+            $this->tahminKalemleriniEkle($request, $vehicle);
+        }
+
         return redirect()->route('araclar.show', $vehicle)->with('ok', 'Araç kaydedildi.');
+    }
+
+    /** Oturumdaki tahmin taslağından VehicleCost kayıtlarını oluşturur. */
+    private function tahminKalemleriniEkle(Request $request, Vehicle $vehicle): void
+    {
+        $taslak = $request->session()->pull('maliyet_taslak');
+        if (! is_array($taslak)) {
+            return;
+        }
+        $bugun = Carbon::today();
+        $gecerliKategori = array_keys(VehicleCost::CATEGORIES);
+        $gecerliPara = array_keys(Para::CURRENCIES);
+
+        foreach ($taslak as $k) {
+            if (! is_array($k) || ! in_array($k['category'] ?? null, $gecerliKategori, true)) {
+                continue;
+            }
+            $tutar = round((float) ($k['amount'] ?? 0), 2);
+            if ($tutar <= 0) {
+                continue;
+            }
+            $para = in_array($k['currency'] ?? null, $gecerliPara, true) ? $k['currency'] : Para::BASE;
+            $kur = $para === Para::BASE ? 1.0 : (float) ($k['rate'] ?? 0);
+            $base = round((float) ($k['base'] ?? ($tutar * $kur)), 2);
+
+            $vehicle->costs()->create([
+                'category' => $k['category'],
+                'description' => $k['description'] ?? null,
+                'amount' => $tutar,
+                'currency' => $para,
+                'rate' => $kur,
+                'base_amount' => $base,
+                'spent_on' => $bugun,
+                'created_by' => $request->user()->id,
+            ]);
+        }
     }
 
     public function show(Vehicle $arac): View

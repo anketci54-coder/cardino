@@ -30,6 +30,22 @@
     @csrf
     @if ($v->exists) @method('PUT') @endif
 
+    @if (!empty($kostTaslak))
+        <input type="hidden" name="tahminden" value="1">
+        <div style="grid-column:1/-1;background:#e6f4ea;border:1px solid #b7e1c3;border-radius:10px;padding:14px 16px">
+            <strong style="color:#1e6b37">Maliyet tahmininden geldi.</strong>
+            <p style="margin:6px 0 10px;font-size:13px;color:#2f5d3c">Araç kaydedilince şu {{ count($kostTaslak) }} maliyet kalemi otomatik eklenecek. Yakıt, motor hacmi, yıl ve rota önceden dolduruldu; marka, model ve şasi numarasını girin.</p>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+                @foreach ($kostTaslak as $k)
+                    <tr>
+                        <td style="padding:.25rem .3rem;border-bottom:1px solid #cfe6d4">{{ $k['description'] ?? (\App\Models\VehicleCost::CATEGORIES[$k['category']] ?? $k['category']) }}</td>
+                        <td style="padding:.25rem .3rem;border-bottom:1px solid #cfe6d4;text-align:right;white-space:nowrap">{{ \App\Support\Para::format($k['amount'], $k['currency']) }}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </div>
+    @endif
+
     @if (auth()->user()->isAdmin())
     <fieldset>
         <legend>Galeri</legend>
