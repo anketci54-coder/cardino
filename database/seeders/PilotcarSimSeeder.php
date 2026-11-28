@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Gallery;
 use App\Models\User;
 use App\Models\Vehicle;
-use App\Support\AracGorsel;
 use App\Support\MaliyetHesaplayici;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -115,20 +114,6 @@ class PilotcarSimSeeder extends Seeder
                 'created_by' => $createdBy,
             ]);
             $arac->save();
-
-            // Şık tanıtım görseli (SVG) üret ve araç fotoğrafı olarak ekle
-            $svg = AracGorsel::svg($arac);
-            $gorselYol = 'araclar/'.$arac->id.'/gorsel.svg';
-            Storage::disk('local')->put($gorselYol, $svg);
-            $arac->files()->create([
-                'kind' => 'foto',
-                'doc_type' => null,
-                'original_name' => $marka.' '.$model.'.svg',
-                'path' => $gorselYol,
-                'mime' => 'image/svg+xml',
-                'size' => strlen($svg),
-                'created_by' => $createdBy,
-            ]);
 
             $h = MaliyetHesaplayici::hesapla([
                 'alis_fiyat' => $fiyat,
