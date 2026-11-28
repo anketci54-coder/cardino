@@ -48,7 +48,7 @@ class AracController extends Controller
             $kostTaslak = $request->session()->get('maliyet_taslak');
             $onDolu = $request->session()->get('tahmin_arac', []);
             $vehicle = new Vehicle(['status' => 'stokta'] + array_intersect_key($onDolu, array_flip([
-                'fuel', 'engine_cc', 'model_year', 'shipping_route',
+                'fuel', 'engine_cc', 'model_year', 'shipping_route', 'make', 'model', 'origin',
             ])));
         }
 

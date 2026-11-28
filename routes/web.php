@@ -4,6 +4,7 @@ use App\Http\Controllers\AracController;
 use App\Http\Controllers\Auth\GirisController;
 use App\Http\Controllers\Auth\SifreController;
 use App\Http\Controllers\DosyaController;
+use App\Http\Controllers\FirsatController;
 use App\Http\Controllers\MaliyetController;
 use App\Http\Controllers\MaliyetHesapController;
 use App\Http\Controllers\PanelController;
@@ -43,6 +44,13 @@ Route::middleware('auth')->group(function () {
     Route::get('maliyet-hesapla', [MaliyetHesapController::class, 'form'])->name('maliyet.hesapla');
     Route::post('maliyet-hesapla', [MaliyetHesapController::class, 'hesapla'])->name('maliyet.hesapla.sonuc');
     Route::post('araclar-tahminden', [AracController::class, 'tahminForm'])->name('araclar.tahmin');
+
+    Route::get('firsatlar', [FirsatController::class, 'index'])->name('firsat.index');
+    Route::get('firsatlar/yeni', [FirsatController::class, 'create'])->name('firsat.create');
+    Route::post('firsatlar', [FirsatController::class, 'store'])->name('firsat.store');
+    Route::get('firsatlar/{firsat}', [FirsatController::class, 'show'])->name('firsat.show');
+    Route::delete('firsatlar/{firsat}', [FirsatController::class, 'destroy'])->name('firsat.destroy');
+    Route::post('firsatlar/{firsat}/araca-cevir', [FirsatController::class, 'aracaCevir'])->name('firsat.araca');
 
     Route::middleware('admin')->prefix('yonetim')->name('yonetim.')->group(function () {
         Route::get('/', [YonetimController::class, 'index'])->name('index');
