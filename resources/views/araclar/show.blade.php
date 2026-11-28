@@ -53,6 +53,8 @@
     .uprow label { font-size: 12px; color: var(--muted); margin-bottom: 3px; display: block; }
     .uprow select, .uprow input[type=file] { width: 100%; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font); background: #fff; color: var(--ink); }
     .subhead { font-size: 13px; color: var(--muted); font-weight: 600; margin: 4px 0 8px; }
+    .hero { margin: 0 0 16px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #0f172a; aspect-ratio: 16 / 9; max-height: 360px; }
+    .hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
 </style>
 @endpush
 @section('content')
@@ -75,6 +77,11 @@
 
 @if ($errors->any())
     <div class="error" role="alert" style="margin-bottom:14px">{{ $errors->first() }}</div>
+@endif
+
+@php $heroFoto = $v->photos()->first(); @endphp
+@if ($heroFoto)
+    <div class="hero"><img src="{{ route('dosya.goster', [$v, $heroFoto]) }}" alt="{{ $v->title() }}" loading="lazy"></div>
 @endif
 
 <div class="grid2">

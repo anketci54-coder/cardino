@@ -15,7 +15,10 @@
     th, td { text-align: left; padding: .7rem .9rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
     th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; background: #fafbfc; }
     tr:last-child td { border-bottom: 0; }
-    td a.t { font-weight: 700; color: var(--ink); text-decoration: none; }
+    td a.t, td .t { font-weight: 700; color: var(--ink); text-decoration: none; }
+    .arac-hucre { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .thumb { flex: none; width: 76px; height: 48px; border-radius: 9px; overflow: hidden; background: #0f172a; border: 1px solid var(--line); }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     td a.t:hover { text-decoration: underline; }
     .empty { padding: 40px 20px; text-align: center; }
     .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 12px; flex-wrap: wrap; }
@@ -66,7 +69,15 @@
             <tbody>
             @foreach ($vehicles as $v)
                 <tr>
-                    <td><a class="t" href="{{ route('araclar.show', $v) }}">{{ $v->title() }}</a>@if($v->color)<div class="muted" style="font-size:13px">{{ $v->color }}</div>@endif</td>
+                    <td>
+                        @php $foto = $v->photos()->first(); @endphp
+                        <a class="arac-hucre" href="{{ route('araclar.show', $v) }}">
+                            @if ($foto)
+                                <span class="thumb"><img src="{{ route('dosya.goster', [$v, $foto]) }}" alt="" loading="lazy"></span>
+                            @endif
+                            <span><span class="t">{{ $v->title() }}</span>@if($v->color)<span class="muted" style="display:block;font-size:13px">{{ $v->color }}</span>@endif</span>
+                        </a>
+                    </td>
                     <td class="mono">{{ $v->chassis_no }}</td>
                     <td>{{ $v->label('origin') }}</td>
                     <td class="num">{{ $v->mileage_km !== null ? number_format($v->mileage_km, 0, ',', '.') : '—' }}</td>

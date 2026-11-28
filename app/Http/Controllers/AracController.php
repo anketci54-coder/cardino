@@ -21,7 +21,7 @@ class AracController extends Controller
     {
         $q = trim((string) $request->query('q'));
         $vehicles = Vehicle::query()
-            ->with('gallery')
+            ->with('gallery', 'files')
             ->when($q !== '', fn ($w) => $w->where(fn ($x) => $x
                 ->where('chassis_no', 'like', "%{$q}%")
                 ->orWhere('engine_no', 'like', "%{$q}%")
